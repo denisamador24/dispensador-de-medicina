@@ -1,101 +1,188 @@
-import Image from "next/image";
+"use client"
 
-export default function Home() {
+import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { PlusCircle, Edit, Trash2 } from "lucide-react"
+
+export default function Component() {
+  const [pacientes, setPacientes] = useState([
+    { id: 1, nombre: "Juan Pérez", habitacion: "101" },
+    { id: 2, nombre: "María García", habitacion: "102" },
+  ])
+
+  const [medicamentos, setMedicamentos] = useState([
+    { id: 1, pacienteId: 1, nombre: "Paracetamol", dosis: "500mg", horario: "08:00, 14:00, 20:00" },
+    { id: 2, pacienteId: 1, nombre: "Ibuprofeno", dosis: "400mg", horario: "10:00, 22:00" },
+    { id: 3, pacienteId: 2, nombre: "Omeprazol", dosis: "20mg", horario: "07:00" },
+  ])
+
+  const [nuevoPaciente, setNuevoPaciente] = useState({ nombre: "", habitacion: "" })
+  const [nuevoMedicamento, setNuevoMedicamento] = useState({ pacienteId: 0, nombre: "", dosis: "", horario: "" })
+
+  const agregarPaciente = async () => {
+    if (nuevoPaciente.nombre && nuevoPaciente.habitacion) {
+      setPacientes([...pacientes, { id: pacientes.length + 1, ...nuevoPaciente }])
+      setNuevoPaciente({ nombre: "", habitacion: "" })
+    }
+
+    // agregar paciente en la base de datos
+    // post a la API
+    const response = await fetch("/api/pacientes", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(nuevoPaciente),
+    })
+  }
+
+  const agregarMedicamento = () => {
+    if (nuevoMedicamento.pacienteId && nuevoMedicamento.nombre && nuevoMedicamento.dosis && nuevoMedicamento.horario) {
+      setMedicamentos([...medicamentos, { id: medicamentos.length + 1, ...nuevoMedicamento }])
+      setNuevoMedicamento({ pacienteId: 0, nombre: "", dosis: "", horario: "" })
+    }
+  }
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/app/page.js
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <div className="container mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-4">Administrador de Medicamentos para Pacientes</h1>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      <Tabs defaultValue="pacientes">
+        <TabsList>
+          <TabsTrigger value="pacientes">Pacientes</TabsTrigger>
+          <TabsTrigger value="medicamentos">Medicamentos</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="pacientes">
+          <Card>
+            <CardHeader>
+              <CardTitle>Lista de Pacientes</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Nombre</TableHead>
+                    <TableHead>Habitación</TableHead>
+                    <TableHead>Acciones</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {pacientes.map((paciente) => (
+                    <TableRow key={paciente.id}>
+                      <TableCell>{paciente.nombre}</TableCell>
+                      <TableCell>{paciente.habitacion}</TableCell>
+                      <TableCell>
+                        <Button variant="ghost" size="icon"><Edit className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="icon"><Trash2 className="h-4 w-4" /></Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+
+              <div className="mt-4 space-y-2">
+                <Label htmlFor="nombre">Nombre del Paciente</Label>
+                <Input
+                  id="nombre"
+                  value={nuevoPaciente.nombre}
+                  onChange={(e) => setNuevoPaciente({ ...nuevoPaciente, nombre: e.target.value })}
+                  placeholder="Nombre del paciente"
+                />
+                <Label htmlFor="habitacion">Habitación</Label>
+                <Input
+                  id="habitacion"
+                  value={nuevoPaciente.habitacion}
+                  onChange={(e) => setNuevoPaciente({ ...nuevoPaciente, habitacion: e.target.value })}
+                  placeholder="Número de habitación"
+                />
+                <Button onClick={agregarPaciente}>
+                  <PlusCircle className="mr-2 h-4 w-4" /> Agregar Paciente
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="medicamentos">
+          <Card>
+            <CardHeader>
+              <CardTitle>Administración de Medicamentos</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Paciente</TableHead>
+                    <TableHead>Medicamento</TableHead>
+                    <TableHead>Dosis</TableHead>
+                    <TableHead>Horario</TableHead>
+                    <TableHead>Acciones</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {medicamentos.map((medicamento) => (
+                    <TableRow key={medicamento.id}>
+                      <TableCell>{pacientes.find(p => p.id === medicamento.pacienteId)?.nombre}</TableCell>
+                      <TableCell>{medicamento.nombre}</TableCell>
+                      <TableCell>{medicamento.dosis}</TableCell>
+                      <TableCell>{medicamento.horario}</TableCell>
+                      <TableCell>
+                        <Button variant="ghost" size="icon"><Edit className="h-4 w-4" /></Button>
+                        <Button variant="ghost" size="icon"><Trash2 className="h-4 w-4" /></Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+
+              <div className="mt-4 space-y-2">
+                <Label htmlFor="paciente">Paciente</Label>
+                <select
+                  id="paciente"
+                  className="w-full p-2 border rounded"
+                  value={nuevoMedicamento.pacienteId}
+                  onChange={(e) => setNuevoMedicamento({ ...nuevoMedicamento, pacienteId: Number(e.target.value) })}
+                >
+                  <option value={0}>Seleccionar paciente</option>
+                  {pacientes.map((paciente) => (
+                    <option key={paciente.id} value={paciente.id}>{paciente.nombre}</option>
+                  ))}
+                </select>
+                <Label htmlFor="medicamento">Medicamento</Label>
+                <Input
+                  id="medicamento"
+                  value={nuevoMedicamento.nombre}
+                  onChange={(e) => setNuevoMedicamento({ ...nuevoMedicamento, nombre: e.target.value })}
+                  placeholder="Nombre del medicamento"
+                />
+                <Label htmlFor="dosis">Dosis</Label>
+                <Input
+                  id="dosis"
+                  value={nuevoMedicamento.dosis}
+                  onChange={(e) => setNuevoMedicamento({ ...nuevoMedicamento, dosis: e.target.value })}
+                  placeholder="Dosis del medicamento"
+                />
+                <Label htmlFor="horario">Horario</Label>
+                <Input
+                  id="horario"
+                  value={nuevoMedicamento.horario}
+                  onChange={(e) => setNuevoMedicamento({ ...nuevoMedicamento, horario: e.target.value })}
+                  placeholder="Horario de administración (ej: 08:00, 14:00, 20:00)"
+                />
+                <Button onClick={agregarMedicamento}>
+                  <PlusCircle className="mr-2 h-4 w-4" /> Agregar Medicamento
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
-  );
+  )
 }
