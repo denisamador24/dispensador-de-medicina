@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -11,14 +11,14 @@ import { PlusCircle, Edit, Trash2 } from "lucide-react"
 
 export default function Component() {
   const [pacientes, setPacientes] = useState([
-    { id: 1, nombre: "Juan Pérez", habitacion: "101" },
-    { id: 2, nombre: "María García", habitacion: "102" },
+    // { id: 1, nombre: "Juan Pérez", habitacion: "101" },
+    // { id: 2, nombre: "María García", habitacion: "102" },
   ])
 
   const [medicamentos, setMedicamentos] = useState([
-    { id: 1, pacienteId: 1, nombre: "Paracetamol", dosis: "500mg", horario: "08:00, 14:00, 20:00" },
-    { id: 2, pacienteId: 1, nombre: "Ibuprofeno", dosis: "400mg", horario: "10:00, 22:00" },
-    { id: 3, pacienteId: 2, nombre: "Omeprazol", dosis: "20mg", horario: "07:00" },
+    // { id: 1, pacienteId: 1, nombre: "Paracetamol", dosis: "500mg", horario: "08:00, 14:00, 20:00" },
+    // { id: 2, pacienteId: 1, nombre: "Ibuprofeno", dosis: "400mg", horario: "10:00, 22:00" },
+    // { id: 3, pacienteId: 2, nombre: "Omeprazol", dosis: "20mg", horario: "07:00" },
   ])
 
   const [nuevoPaciente, setNuevoPaciente] = useState({ nombre: "", habitacion: "" })
@@ -26,27 +26,74 @@ export default function Component() {
 
   const agregarPaciente = async () => {
     if (nuevoPaciente.nombre && nuevoPaciente.habitacion) {
-      setPacientes([...pacientes, { id: pacientes.length + 1, ...nuevoPaciente }])
-      setNuevoPaciente({ nombre: "", habitacion: "" })
-    }
+      // agregar paciente en la base de datos
+      // post a la API
+      // convertir texto a número
+      const habitacion = parseInt(nuevoPaciente.habitacion)
+      const newPatient = {
+        nombre: nuevoPaciente.nombre,
+        habitacion: habitacion
+      }
+      const response = await fetch('api/pacientes', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newPatient),
+      })
+      const newPaciente = await response.json()
 
-    // agregar paciente en la base de datos
-    // post a la API
-    const response = await fetch("/api/pacientes", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(nuevoPaciente),
-    })
+      if (response.ok) {
+        setPacientes([...pacientes, newPaciente.data])
+        setNuevoPaciente({ nombre: "", habitacion: "" })
+      }
+    }
   }
 
-  const agregarMedicamento = () => {
+  const agregarMedicamento = async () => {
     if (nuevoMedicamento.pacienteId && nuevoMedicamento.nombre && nuevoMedicamento.dosis && nuevoMedicamento.horario) {
-      setMedicamentos([...medicamentos, { id: medicamentos.length + 1, ...nuevoMedicamento }])
+      // agregar medicamento en la base de datos
+      // post a la API
+      const response = await fetch('api/medicamentos', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(nuevoMedicamento),
+      })
+      const newMedicamento = await response.json()
+      console.log(newMedicamento);
+
+
+      setMedicamentos([...medicamentos, newMedicamento.data])
       setNuevoMedicamento({ pacienteId: 0, nombre: "", dosis: "", horario: "" })
     }
   }
+
+  useEffect(() => {
+    // cargar pacientes de la base de datos
+    // get a la API
+
+    const getPatients = async () => {
+      const response = await fetch('/api/pacientes')
+      const data = await response.json()
+      console.log(data);
+
+      setPacientes(data)
+    }
+
+    const getMedicamentos = async () => {
+      const response = await fetch('/api/medicamentos')
+      const data = await response.json()
+      console.log(data);
+
+      setMedicamentos(data)
+    }
+
+    getPatients()
+    getMedicamentos()
+  }, []);
+
 
   return (
     <div className="container mx-auto p-4">
@@ -73,16 +120,22 @@ export default function Component() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {pacientes.map((paciente) => (
-                    <TableRow key={paciente.id}>
-                      <TableCell>{paciente.nombre}</TableCell>
-                      <TableCell>{paciente.habitacion}</TableCell>
-                      <TableCell>
-                        <Button variant="ghost" size="icon"><Edit className="h-4 w-4" /></Button>
-                        <Button variant="ghost" size="icon"><Trash2 className="h-4 w-4" /></Button>
-                      </TableCell>
+                  {pacientes.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={3}>No hay pacientes registrados</TableCell>
                     </TableRow>
-                  ))}
+                  )
+                    :
+                    (pacientes.map((paciente) => (
+                      <TableRow key={paciente._id}>
+                        <TableCell>{paciente.nombre}</TableCell>
+                        <TableCell>{paciente.habitacion}</TableCell>
+                        <TableCell>
+                          <Button variant="ghost" size="icon"><Edit className="h-4 w-4" /></Button>
+                          <Button variant="ghost" size="icon"><Trash2 className="h-4 w-4" /></Button>
+                        </TableCell>
+                      </TableRow>
+                    )))}
                 </TableBody>
               </Table>
 
@@ -126,18 +179,25 @@ export default function Component() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {medicamentos.map((medicamento) => (
-                    <TableRow key={medicamento.id}>
-                      <TableCell>{pacientes.find(p => p.id === medicamento.pacienteId)?.nombre}</TableCell>
-                      <TableCell>{medicamento.nombre}</TableCell>
-                      <TableCell>{medicamento.dosis}</TableCell>
-                      <TableCell>{medicamento.horario}</TableCell>
-                      <TableCell>
-                        <Button variant="ghost" size="icon"><Edit className="h-4 w-4" /></Button>
-                        <Button variant="ghost" size="icon"><Trash2 className="h-4 w-4" /></Button>
-                      </TableCell>
+                  {medicamentos.length === 0
+                    ?
+                    <TableRow key={1}>
+                      <TableCell colSpan={5}>No hay medicamentos registrados</TableCell>
                     </TableRow>
-                  ))}
+                    :
+                    medicamentos.map((medicamento) => (
+                      <TableRow key={medicamento.id}>
+                        <TableCell>{pacientes.find(p => p.id === medicamento.pacienteId)?.nombre}</TableCell>
+                        <TableCell>{medicamento.nombre}</TableCell>
+                        <TableCell>{medicamento.dosis}</TableCell>
+                        <TableCell>{medicamento.horario}</TableCell>
+                        <TableCell>
+                          <Button variant="ghost" size="icon"><Edit className="h-4 w-4" /></Button>
+                          <Button variant="ghost" size="icon"><Trash2 className="h-4 w-4" /></Button>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  }
                 </TableBody>
               </Table>
 
@@ -147,11 +207,11 @@ export default function Component() {
                   id="paciente"
                   className="w-full p-2 border rounded"
                   value={nuevoMedicamento.pacienteId}
-                  onChange={(e) => setNuevoMedicamento({ ...nuevoMedicamento, pacienteId: Number(e.target.value) })}
+                  onChange={(e) => setNuevoMedicamento({ ...nuevoMedicamento, pacienteId: e.target.value })}
                 >
                   <option value={0}>Seleccionar paciente</option>
                   {pacientes.map((paciente) => (
-                    <option key={paciente.id} value={paciente.id}>{paciente.nombre}</option>
+                    <option key={paciente._id} value={paciente._id}>{paciente.nombre}</option>
                   ))}
                 </select>
                 <Label htmlFor="medicamento">Medicamento</Label>
