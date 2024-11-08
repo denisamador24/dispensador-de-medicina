@@ -4,7 +4,7 @@ import Paciente from "@/models/Paciente";
 
 export async function POST(req, res) {
   try {
-    connectToDatabase();
+    await connectToDatabase();
     // datos json del body
     const data = await req.json();
     console.log(data);
@@ -18,7 +18,7 @@ export async function POST(req, res) {
 
 export async function GET(req, res) {
   try {
-    connectToDatabase();
+    await connectToDatabase();
     const pacientes = await Paciente.find();
     return NextResponse.json(pacientes);
   } catch (error) {
@@ -28,7 +28,7 @@ export async function GET(req, res) {
 
 export async function PATCH(req, res) {
   try {
-    connectToDatabase();
+    await connectToDatabase();
     const data = await req.json();
     const paciente = await Paciente.findByIdAndUpdate(
       { _id: data._id },
@@ -45,7 +45,7 @@ export async function PATCH(req, res) {
 
 export async function DELETE(req, res) {
   try {
-    connectToDatabase();
+    await connectToDatabase();
     const data = await req.json();
     console.log("ID ____________", data._id);
 

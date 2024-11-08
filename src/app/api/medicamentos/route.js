@@ -4,7 +4,7 @@ import connectToDatabase from "@/lib/mongoose";
 
 export async function GET(req, res) {
   try {
-    connectToDatabase();
+    await connectToDatabase();
     const medicamentos = await Medicamento.find();
     return NextResponse.json(medicamentos);
   } catch (error) {
@@ -14,7 +14,7 @@ export async function GET(req, res) {
 
 export async function POST(req, res) {
   try {
-    connectToDatabase();
+    await connectToDatabase();
     const data = await req.json();
     const medicamento = await Medicamento.create(data);
     return NextResponse.json({ data: medicamento });
@@ -25,7 +25,7 @@ export async function POST(req, res) {
 
 export async function PATCH(req, res) {
   try {
-    connectToDatabase();
+    await connectToDatabase();
     const data = await req.json();
     const medicamento = await Medicamento.findByIdAndUpdate(
       { _id: data._id },
